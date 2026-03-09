@@ -2462,20 +2462,13 @@ table.s-table tr:hover{background:rgba(108,92,231,0.03);}
 @keyframes musicPulse{0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(108,92,231,0.4);}50%{transform:scale(1.05);box-shadow:0 0 60px rgba(108,92,231,0.6);}}
 </style>
 
-<!-- Плеер: play/pause + track dots + volume -->
+<!-- Плеер: play/pause + volume -->
 <div id="musicControl" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:none;align-items:center;gap:6px;">
-  <div id="trackDots" style="display:flex;gap:4px;">
-    <button onclick="switchTrack(0)" class="s-track-btn" style="width:7px;height:7px;border-radius:50%;border:none;background:#6C5CE7;cursor:pointer;opacity:1;"></button>
-    <button onclick="switchTrack(1)" class="s-track-btn" style="width:7px;height:7px;border-radius:50%;border:none;background:#6C5CE7;cursor:pointer;opacity:0.3;"></button>
-    <button onclick="switchTrack(2)" class="s-track-btn" style="width:7px;height:7px;border-radius:50%;border:none;background:#6C5CE7;cursor:pointer;opacity:0.3;"></button>
-    <button onclick="switchTrack(3)" class="s-track-btn" style="width:7px;height:7px;border-radius:50%;border:none;background:#6C5CE7;cursor:pointer;opacity:0.3;"></button>
-    <button onclick="switchTrack(4)" class="s-track-btn" style="width:7px;height:7px;border-radius:50%;border:none;background:#6C5CE7;cursor:pointer;opacity:0.3;"></button>
-  </div>
   <button id="bgMusicBtn" onclick="toggleBgMusic()" style="padding:6px 12px;border-radius:8px;border:none;background:rgba(12,6,22,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.6);">
     <svg id="bgMusicIcon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 6v4M4 4v8M7 2v12M10 5v6M13 7v2"/></svg>
     <span id="bgMusicLabel">Пауза</span>
   </button>
-  <input id="bgMusicVol" type="range" min="0" max="100" value="40" oninput="setBgVolume(this.value)" style="width:60px;height:3px;accent-color:#6C5CE7;cursor:pointer;">
+  <input id="bgMusicVol" type="range" min="0" max="100" value="30" oninput="setBgVolume(this.value)" style="width:60px;height:3px;accent-color:#6C5CE7;cursor:pointer;">
 </div>
 
 <script>
@@ -2484,62 +2477,23 @@ table.s-table tr:hover{background:rgba(108,92,231,0.03);}
   var overlay = document.getElementById('musicOverlay');
   var control = document.getElementById('musicControl');
   var bgPlaying = false;
-  var currentTrack = 0;
 
-  var tracks = [
-    'https://p.scdn.co/mp3-preview/888c3b69a95aa28434b3e578974d9f781fe07dff', // Chill Lounge
-    'https://p.scdn.co/mp3-preview/63999c15b82953cd4fec30ab83154ba679dd6790', // Calm Reflections
-    'https://p.scdn.co/mp3-preview/cf23f67017d13c36608286f3ed56935a3c3c3dbb', // Kissing the Sunset
-    'https://p.scdn.co/mp3-preview/c87230dd3cb4d2d3ae3dfa5c7b28837248268de3', // Beach Whisper
-    'https://p.scdn.co/mp3-preview/5397a9e2a0a8d818ba82f1f6b19acfc7f52ed001'  // Don't Know Why
-  ];
-
-  function loadTrack(idx){
-    currentTrack = idx;
-    audio.pause();
-    audio.currentTime = 0;
-    audio.src = tracks[idx];
-    audio.load();
-    // Update dots
-    document.querySelectorAll('.s-track-btn').forEach(function(b,i){
-      b.style.opacity = i === idx ? '1' : '0.3';
-    });
-  }
-
-  // When track ends — play next
-  audio.addEventListener('ended', function(){
-    var next = (currentTrack + 1) % tracks.length;
-    loadTrack(next);
-    audio.play();
-  });
-
-  // Load first track
-  loadTrack(0);
-  audio.volume = 0.4;
-
-  // Try autoplay
-  var autoplayPromise = audio.play();
-  if(autoplayPromise !== undefined){
-    autoplayPromise.then(function(){
-      bgPlaying = true;
-      overlay.style.display = 'none';
-      control.style.display = 'flex';
-      updateBtn();
-    }).catch(function(){
-      overlay.style.display = 'flex';
-    });
-  }
+  // Hotel Lobby Jazz — 3 hours continuous luxury lounge (archive.org)
+  audio.src = 'https://archive.org/download/hotel-lobby-music-2020-instrumental-jazz-lounge-from-luxury-hotels/Hotel%20lobby%20music%20-%202020%20Instrumental%20Jazz%20Lounge%20from%20luxury%20hotels.mp3';
+  audio.volume = 0.3;
+  audio.loop = true;
+  overlay.style.display = 'flex';
 
   // Click overlay to start
-  overlay.addEventListener('click', function(){
+  overlay.onclick = function(){
     audio.play().then(function(){
       bgPlaying = true;
       overlay.style.opacity = '0';
       setTimeout(function(){ overlay.style.display = 'none'; }, 500);
       control.style.display = 'flex';
       updateBtn();
-    });
-  });
+    }).catch(function(){});
+  };
 
   function updateBtn(){
     document.getElementById('bgMusicLabel').textContent = bgPlaying ? 'Пауза' : 'Играть';
@@ -2559,13 +2513,6 @@ table.s-table tr:hover{background:rgba(108,92,231,0.03);}
 
   window.setBgVolume = function(val){
     audio.volume = val / 100;
-  };
-
-  window.switchTrack = function(idx){
-    loadTrack(idx);
-    audio.play();
-    bgPlaying = true;
-    updateBtn();
   };
 })();
 </script>
